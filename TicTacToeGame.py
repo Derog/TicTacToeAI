@@ -24,7 +24,44 @@ class Board():
         else:
             raise IndexError("Tryng to insert in an occupied position")
 
-            # TODO <Detection of game ending>
+        # First check if there are avaible slots to play in, since we have the number of moves this is easy
+        if self.number_of_moves() == 9:
+            self._is_game_not_ended = False
+
+        #Now we will check if someone wins the game; we will search only for the player playing
+        def win_check(position, value, vector=(0, 0)):
+            #Check if the position is valid
+            x = position[0]
+            y = position[1]
+            if x < 0 or y < 0 or x > 2 or y > 2:
+                return 0
+            else:
+                if vector == (0,0):
+                    #First time execution
+                    if self._board_values[x][y]==value:
+                        max_value=0
+                        vector_list=[(1,0),(0,1),(1,1),(1,-1)]
+                        for element in vector_list:
+                            #Reevaluates with all the displacements
+                            temp=0
+                            temp = win_check((x+element[0],y+element[1]),value,element)
+                            temp+= win_check((x-element[0],y-element[1]),value,(-element[0],-element[1]))
+                            if temp>max_value:
+                                max_value=temp
+                        return 1+max_value
+                    else:
+                        raise ValueError("Function should be used if the first position/value is wrong")
+                else:
+                    #Recursive values
+                    if self._board_values[x][y]==value:
+                        return 1 + win_check((x+vector[0],y+vector[1]),value,vector)
+                    else:
+                        return 0
+
+        if win_check((xposition,yposition),value)>2:
+            self._is_game_not_ended=False
+            self.winner=value
+
 
     def number_of_moves(self):
         return self._number_of_moves
@@ -57,9 +94,9 @@ class Board():
         return self.is_game_notended()
 
     def __len__(self):
-        return self._numeber_of_moves
+        return self._numeer_of_moves
 
-    def winner(self):
+    def who_wins(self):
         return self.winner
 
 
@@ -112,7 +149,7 @@ class Game():
         self.player1 = player1
         self.player2 = player2
         self.turn = turn
-        self._winner = None
+        self._winner = 0
         self.lastmove = (None, None)
 
     def move(self):
@@ -124,23 +161,23 @@ class Game():
         self.turn *= -1
 
         if not self.board.is_game_notended():
-            self.winner = self.board.winner()
+            self._winner = self.board.who_wins()
 
 
     def __bool__(self):
-        return self.board.is_game_notended()
+        return self.is_game_notended()
 
     def __str__(self):
-        text = 'Player1 is ' + self.player1.getName() + '\n'
-        text += 'Player2 is ' + self.player2.getName() + '\n'
+        text = 'Player1[X] is ' + self.player1.getName() + '\n'
+        text += 'Player2[O] is ' + self.player2.getName() + '\n'
         text += str(self.board)
         return text
 
     def __iter__(self):
         self.move()
 
-    def is_game_ended(self):
-        pass
+    def is_game_notended(self):
+        return self.board.is_game_notended()
 
     def number_of_moves(self):
         return self.board.number_of_moves()
@@ -149,11 +186,20 @@ class Game():
         self.number_of_moves()
 
     def winner(self):
-        if self.is_game_ended():
-            return self.winner
+        if self.is_game_notended():
+            return "No one won yet"
+        else:
+            if self._winner ==1:
+                return self.player1.getName()
+            elif self._winner==0:
+                return "Draw"
+            else:
+                return self.player2.getName()
 
     def who_plays(self):
         if self.turn == 1:
             return self.player1.getName()
         else:
             return self.player2.getName()
+
+#TODO <Rename Functions and try to apply a super-class method>
