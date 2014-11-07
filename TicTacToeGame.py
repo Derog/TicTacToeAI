@@ -11,6 +11,15 @@ class Board():
         self._number_of_moves = 0
         self.winner = 0
 
+    def value(self, xposition, yposition):
+        return self._board_values[xposition][yposition]
+
+    def values(self):
+        return self._board_values
+
+    def load(self, values):
+        self._board_values = values[:]
+
     def is_game_notended(self):
         return self._is_game_not_ended
 
@@ -28,7 +37,7 @@ class Board():
         if self.number_of_moves() == 9:
             self._is_game_not_ended = False
 
-        #Now we will check if someone wins the game; we will search only for the player playing
+        # Now we will check if someone wins the game; we will search only for the player playing
         def win_check(position, value, vector=(0, 0)):
             #Check if the position is valid
             x = position[0]
@@ -36,31 +45,31 @@ class Board():
             if x < 0 or y < 0 or x > 2 or y > 2:
                 return 0
             else:
-                if vector == (0,0):
+                if vector == (0, 0):
                     #First time execution
-                    if self._board_values[x][y]==value:
-                        max_value=0
-                        vector_list=[(1,0),(0,1),(1,1),(1,-1)]
+                    if self._board_values[x][y] == value:
+                        max_value = 0
+                        vector_list = [(1, 0), (0, 1), (1, 1), (1, -1)]
                         for element in vector_list:
                             #Reevaluates with all the displacements
-                            temp=0
-                            temp = win_check((x+element[0],y+element[1]),value,element)
-                            temp+= win_check((x-element[0],y-element[1]),value,(-element[0],-element[1]))
-                            if temp>max_value:
-                                max_value=temp
-                        return 1+max_value
+                            temp = 0
+                            temp = win_check((x + element[0], y + element[1]), value, element)
+                            temp += win_check((x - element[0], y - element[1]), value, (-element[0], -element[1]))
+                            if temp > max_value:
+                                max_value = temp
+                        return 1 + max_value
                     else:
                         raise ValueError("Function should be used if the first position/value is wrong")
                 else:
                     #Recursive values
-                    if self._board_values[x][y]==value:
-                        return 1 + win_check((x+vector[0],y+vector[1]),value,vector)
+                    if self._board_values[x][y] == value:
+                        return 1 + win_check((x + vector[0], y + vector[1]), value, vector)
                     else:
                         return 0
 
-        if win_check((xposition,yposition),value)>2:
-            self._is_game_not_ended=False
-            self.winner=value
+        if win_check((xposition, yposition), value) > 2:
+            self._is_game_not_ended = False
+            self.winner = value
 
 
     def number_of_moves(self):
@@ -101,9 +110,12 @@ class Board():
 
 
 class Player():
-    def __init__(self, name, brain=None, human=False):
+    def __init__(self, name="", brain=None, human=False):
         self.name = name
         self._is_human = human
+        self.comp_time = []
+        if name == "" and brain != None:
+            self.name = str(brain)
         if brain is not None:
             self.brain = brain
 
@@ -123,15 +135,24 @@ class Player():
     def getName(self):
         return self.name
 
-    def move(self, board, lastmove):
+    def get_average_time(self):
+        return sum(self.comp_time) / len(self.comp_time)
+
+    def move(self, board, lastmove, player):
+        import time
+
+        start = time.clock()
         if self.is_human():
             move = []
             move[0] = fileinput.input()
             move[1] = fileinput.input()
+            self.comp_time.append((time.clock() - start))
             return move
         else:
             if self.has_brain():
-                return self.brain(board, lastmove)
+                play = self.brain(board, lastmove, player)
+                self.comp_time.append((time.clock() - start))
+                return play
             else:
                 print("If the player is not an human a brain needs to be loaded")
                 return None
@@ -154,9 +175,10 @@ class Game():
 
     def move(self):
         if self.turn == 1:
-            self.lastmove = self.player1.move(self.board.getBoardValues(), self.lastmove)
+            self.lastmove = self.player1.move(self.board.getBoardValues(), self.lastmove, self.turn)
         else:
-            self.lastmove = self.player2.move(self.board.getBoardValues(), self.lastmove)
+            self.lastmove = self.player2.move(self.board.getBoardValues(), self.lastmove, self.turn)
+
         self.board.move(self.lastmove[0], self.lastmove[1], self.turn)
         self.turn *= -1
 
@@ -189,9 +211,9 @@ class Game():
         if self.is_game_notended():
             return "No one won yet"
         else:
-            if self._winner ==1:
+            if self._winner == 1:
                 return self.player1.getName()
-            elif self._winner==0:
+            elif self._winner == 0:
                 return "Draw"
             else:
                 return self.player2.getName()
@@ -201,5 +223,3 @@ class Game():
             return self.player1.getName()
         else:
             return self.player2.getName()
-
-#TODO <Rename Functions and try to apply a super-class method>
