@@ -39,7 +39,7 @@ class Board():
 
         # Now we will check if someone wins the game; we will search only for the player playing
         def win_check(position, value, vector=(0, 0)):
-            #Check if the position is valid
+            # Check if the position is valid
             x = position[0]
             y = position[1]
             if x < 0 or y < 0 or x > 2 or y > 2:
@@ -223,3 +223,5 @@ class Game():
             return self.player1.getName()
         else:
             return self.player2.getName()
+
+            #TODO <Short the wasted time>
