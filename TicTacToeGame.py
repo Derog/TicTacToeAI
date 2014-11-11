@@ -11,6 +11,9 @@ class Board():
         self._number_of_moves = 0
         self.winner = 0
 
+    def __str__(self):
+        return str(self._board_values)
+
     def value(self, xposition, yposition):
         return self._board_values[xposition][yposition]
 
@@ -18,7 +21,14 @@ class Board():
         return self._board_values
 
     def load(self, values):
-        self._board_values = values[:]
+        self._board_values = values
+        #We need to check that the loading is valid and also count the number of of moves
+        remaining_moves=9
+        for j in range(3):
+            for i in range(3):
+                if self.value(i, j) == 0:
+                    remaining_moves-=1
+        self._number_of_moves=remaining_moves
 
     def is_game_notended(self):
         return self._is_game_not_ended
@@ -36,6 +46,7 @@ class Board():
         # First check if there are avaible slots to play in, since we have the number of moves this is easy
         if self.number_of_moves() == 9:
             self._is_game_not_ended = False
+        #We need an extra check for this one
 
         # Now we will check if someone wins the game; we will search only for the player playing
         def win_check(position, value, vector=(0, 0)):
@@ -78,7 +89,7 @@ class Board():
     def __call__(self, *args, **kwargs):
         self.move(args[0][0], args[0][1], args[1])
 
-    def __str__(self):
+    def plot(self):
         text = '#=#=#=#'
 
         for i in range(3):
@@ -94,7 +105,7 @@ class Board():
                 text += '|'
             text += '\n#=#=#=#'
 
-        return text
+        print(text)
 
     def getBoardValues(self):
         return self._board_values
@@ -189,11 +200,10 @@ class Game():
     def __bool__(self):
         return self.is_game_notended()
 
-    def __str__(self):
-        text = 'Player1[X] is ' + self.player1.getName() + '\n'
-        text += 'Player2[O] is ' + self.player2.getName() + '\n'
-        text += str(self.board)
-        return text
+    def plot(self):
+        print('Player1[X] is ' + self.player1.getName())
+        print('Player2[O] is ' + self.player2.getName())
+        self.board.plot()
 
     def __iter__(self):
         self.move()
@@ -224,4 +234,4 @@ class Game():
         else:
             return self.player2.getName()
 
-            #TODO <Short the wasted time>
+            #TODO <Instead of creating new games learn how to reset the previous>

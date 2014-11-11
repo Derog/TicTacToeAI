@@ -12,7 +12,7 @@ def SingleBotGame(brain1, brain2):
 
     while SimpleGame:
         SimpleGame.move()
-        print(SimpleGame)
+        SimpleGame.plot()
 
     print('Game Ended With Winner: ' + SimpleGame.winner())
 
@@ -27,10 +27,14 @@ def round_sig(x, sig=1):
 def BotStats(brain1, brain2):
     Bot1 = TicTacToeGame.Player(brain=brain1)
     Bot2 = TicTacToeGame.Player(brain=brain2)
+
     import time
 
     ngames = 500
+
     start = time.clock()
+    report_interval = 5
+    report = 0
 
     results_first = []
 
@@ -39,6 +43,9 @@ def BotStats(brain1, brain2):
         while SimpleGameStat:
             SimpleGameStat.move()
         results_first.append(SimpleGameStat.winner())
+        if (time.clock() - start) > ((report + 1) * report_interval):
+            report += 1
+            print('[' + str(i) + ']:' + str(results_first[-1]))
 
     stats_first = {}
     stats_first[Bot1.getName()] = 0
@@ -62,6 +69,9 @@ def BotStats(brain1, brain2):
         while SimpleGameStat:
             SimpleGameStat.move()
         results_second.append(SimpleGameStat.winner())
+        if (time.clock() - start) > ((report + 1) * report_interval):
+            report += 1
+            print('[' + str(i) + ']:' + str(results_second[-1]))
 
     stats_second = {}
     stats_second[Bot1.getName()] = 0
@@ -79,20 +89,20 @@ def BotStats(brain1, brain2):
     tr1 = (tr_11 + tr_22) / 2
     tr2 = (tr_12 + tr_21) / 2
 
-    tr1 = round_sig(tr1 * ngames * 2)
-    tr2 = round_sig(tr2 * ngames * 2)
+    tr1 = round_sig(tr1 * ngames * 4)
+    tr2 = round_sig(tr2 * ngames * 4)
 
     print('       ' + Bot2.getName() + '[' + str(tr1) + 's]' + '  ' + Bot1.getName() + '[' + str(
         tr2) + 's]' + '  ' + 'Draw')
     print('First: ' + wr_11 + ' ' * (len(Bot2.getName()) - len(wr_11) + len(str(tr1)) + 5) + wr_12 + ' ' * (
-    len(Bot1.getName()) - len(wr_12) + len(str(tr2)) + 5) + wr_13)
+        len(Bot1.getName()) - len(wr_12) + len(str(tr2)) + 5) + wr_13)
     print('Secon: ' + wr_22 + ' ' * (len(Bot2.getName()) - len(wr_22) + len(str(tr1)) + 5) + wr_21 + ' ' * (
-    len(Bot1.getName()) - len(wr_21) + len(str(tr2)) + 5) + wr_23)
+        len(Bot1.getName()) - len(wr_21) + len(str(tr2)) + 5) + wr_23)
     print('TTime: ' + str(round_sig(time.clock() - start, 2)) + 's')
     print('WTime: ' + str(round_sig(time.clock() - start - tr1 - tr2, 2)) + 's')
 
 
-SingleBotGame(TicTacToeBrain.FisrtTreeDouble(), TicTacToeBrain.FirstTree())
-BotStats(TicTacToeBrain.FisrtTreeDouble(), TicTacToeBrain.FirstTree())
+SingleBotGame(TicTacToeBrain.RandomBrain(), TicTacToeBrain.FisrtTreeDouble())
+BotStats(TicTacToeBrain.RandomBrain(), TicTacToeBrain.FisrtTreeDouble())
 
 # TODO <Short the code, and clean up the single game version>
